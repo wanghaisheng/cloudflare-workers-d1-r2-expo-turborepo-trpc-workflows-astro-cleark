@@ -24,7 +24,7 @@ export const momentsRouter = {
   add: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx}) => {
-      const { userId } = ctx.user;
+      const userId = ctx.user.userId;
       if (!userId) return {success: false};
       
       const nowPT = getPacificTime();
@@ -46,7 +46,7 @@ export const momentsRouter = {
   getAll: protectedProcedure
     .query(
       async ({ ctx }) => {
-        if (!ctx.user.userId) return [];
+        if (!ctx.user?.userId) return [];
         
         const startOfToday = getStartOfDayPT();
         

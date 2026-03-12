@@ -9,7 +9,7 @@ export const userRouter = {
   updateArtStyle: protectedProcedure
     .input(z.enum(artStyles))
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.user.userId) throw new Error("Not authenticated");
+      if (!ctx.user?.userId) throw new Error("Not authenticated");
       
       await ctx.db
         .update(userMeta)
@@ -21,7 +21,7 @@ export const userRouter = {
     
   getPreferences: protectedProcedure
     .query(async ({ ctx }) => {
-      if (!ctx.user.userId) throw new Error("Not authenticated");
+      if (!ctx.user?.userId) throw new Error("Not authenticated");
       
       const preferences = await ctx.db
         .select()

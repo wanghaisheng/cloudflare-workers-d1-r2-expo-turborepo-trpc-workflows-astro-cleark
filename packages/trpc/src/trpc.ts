@@ -26,6 +26,13 @@ export async function createContext({
 
   const user = res.toAuth();  // This can return null if not authenticated
 
+  // Add userId to user object for easier access
+  if (user && user.getToken) {
+    const token = await user.getToken();
+    const payload = token ? JSON.parse(atob(token.split('.')[1] || '')) : null;
+    (user as any).userId = payload?.sub;
+  }
+
   return {req, resHeaders, user, db, imagesBucket};
 }
 

@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 export const recapsRouter = {
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      if (!ctx.user.userId) return [];
+      if (!ctx.user?.userId) return [];
       const userRecaps = await ctx.db
         .select()
         .from(recaps)
@@ -16,7 +16,7 @@ export const recapsRouter = {
   getById: protectedProcedure
     .input(z.coerce.number().positive())
     .query(async ({ ctx, input }) => {
-      if (!ctx.user.userId) return null;
+      if (!ctx.user?.userId) return null;
       
       const recap = await ctx.db
         .select()
