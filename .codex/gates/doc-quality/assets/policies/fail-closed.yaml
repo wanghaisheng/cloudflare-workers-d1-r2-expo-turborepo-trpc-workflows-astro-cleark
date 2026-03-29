@@ -1,0 +1,6 @@
+id: fail-closed
+required_manifest_mappings: true
+fail_on_unmapped_governed_docs: true
+fail_on_missing_contracts: true
+fail_on_unknown_contract_ids: true
+fail_on_expired_waivers: true

@@ -1,0 +1,611 @@
+# `.codex` Harness 化优化方案
+
+## Summary
+以“兼容现状、不中断 Quick/BMM”为前提，优化方向不是重写 `.codex`，而是把它从“流程手册”升级为“流程控制层 + repo 记录系统入口 + 可验证约束层”。
+
+默认采用渐进式改造：
+- 保留现有 `Quick` / `BMM` 两种模式，不增加第三种用户模式。
+- 保留 `.codex` 作为 workflow/control plane。
+- 把 durable repo truth 下沉到 `docs/`，让 agent 能靠仓内资料完成更多判断。
+- 把关键架构边界、验证闭环、文档新鲜度，改成“文档 + 脚本检查”双轨，而不是只靠 prose。
+
+## Key Changes
+### 1. 重新定义 `.codex` 的职责边界
+- 把 [`.codex/README.md`](/e:/workspace/ct-scanner-compass-directory/.codex/README.md) 改成“控制平面总索引”，只保留：
+  - 模式选择
+  - workflow 路由
+  - 必经 gate
+  - repo 记录系统入口
+  - 校验入口
+- 明确约束：
+  - `.codex/` 只放 workflow、guardrail、task packaging、validation rules。
+  - `docs/` 才是 repo 事实记录层。
+  - `ref/` 只做外部参考，不作为执行真相源。
+
+### 2. 建立 agent 可读的“记录系统”
+- 扩充 `docs/system-maps/`，从当前少量热点文档升级为按域索引的 record system。
+- 新增一个顶层索引，例如 `docs/system-maps/index.md` 或强化现有 README，使其至少覆盖：
+  - runtime/app shell
+  - routing/i18n/SEO
+  - content pipeline
+  - data/query/cache
+  - admin/system routes
+  - build/deploy/prerender
+  - observability/audit
+- 每个 map 统一 frontmatter/interface：
+  - `owner`
+  - `last_reviewed`
+  - `source_of_truth`
+  - `depends_on`
+  - `validation_entrypoints`
+- 要求 `.codex` workflow 引导优先读取这些 map，而不是直接扫全仓。
+
+### 3. 增加“渐进披露”结构，降低上下文噪音
+- 把 `.codex/workflows/router.md` 保持为第一跳，只判断模式和入口，不承载细节。
+- 把现有 core 文档按层次重组为：
+  - `workflow rules`
+  - `planning/package rules`
+  - `validation/closeout rules`
+  - `architecture/observability rules`
+- 每份文档开头增加“何时阅读 / 不适用场景 / 上游入口 / 下游文档”四段式元信息。
+- 删除或合并重复说明，避免同一规则在 `AGENTS.md`、`.codex/README.md`、workflow、core 文档里重复定义。
+
+### 4. 把架构边界从“建议”升级为“契约”
+- 参考 harness 图里的 layered domain 方式，新增 repo 架构契约文档，定义至少三类边界：
+  - route/page/template/layout/component 的 UI 边界
+  - query/data loader/service/repo 的数据边界
+  - i18n/SEO/route-locale 这类 cross-cutting 边界
+- 为这些边界补最小机械校验：
+  - import boundary lint
+  - forbidden dependency path rules
+  - route-owned locale/head ownership 的测试或静态检查
+- 在 `.codex` 中明确：发现架构偏差时先改 contract/map，再做实现。
+
+### 5. 把 observability 和验证闭环写成标准流程
+- 参考 `ref/haerness` 的 closed loop，把现有 `observability.md` 和 validation docs 收敛成统一验证 contract：
+  - before snapshot
+  - trigger path
+  - runtime evidence
+  - after snapshot
+  - regression checks
+  - closeout record
+- 为 UI/SSR/SEO/audit 类任务提供固定验证模板，要求每次非 trivial 变更至少绑定一个 evidence path。
+- 在 `docs/system-maps/` 中为关键路由包记录：
+  - 如何启动
+  - 看哪些日志/报告
+  - 哪些审计结果算 pass
+  - 已知 warning 列表
+
+### 6. 建立文档新鲜度和一致性治理
+- 新增一个轻量文档校验脚本，至少检查：
+  - `system-maps` frontmatter 完整性
+  - `last_reviewed` 是否过期
+  - 索引是否覆盖实际高频子系统
+  - 文档链接是否失效
+  - `.codex` 指向的入口是否存在
+- 给 `openspec`、`.codex`、`docs/system-maps` 建最小同步规则：
+  - 架构变更先改 contract/map
+  - 里程碑级实现后补 validation note
+  - 关闭 change 前必须过文档一致性检查
+
+## Interfaces / Contracts
+- `docs/system-maps/*` 统一 frontmatter schema：
+  - `owner: string`
+  - `last_reviewed: YYYY-MM-DD`
+  - `source_of_truth: string[]`
+  - `depends_on: string[]`
+  - `validation_entrypoints: string[]`
+- 新增一个 doc-check 命令契约，例如：
+  - `npm run docs:check`
+  - 输出 broken links、missing metadata、stale maps、orphan maps
+- 新增一个 architecture contract 文档入口，作为 workflow 必读候选，而不是散落在实现文件内。
+
+## Test Plan
+- 文档层验证
+  - `.codex` 所有入口链接可达
+  - `docs/system-maps` frontmatter 完整
+  - 无 orphan map、无失效交叉引用
+- 约束层验证
+  - import boundary / path rule 生效
+  - locale/head ownership 的现有 SSR 回归继续通过
+  - validation matrix 与实际命令入口一致
+- 工作流验证
+  - Quick 路径可从 `AGENTS.md -> .codex/README -> router -> quick`
+  - BMM 路径可从 `AGENTS.md -> .codex/README -> router -> bmm`
+  - 一个 representative task 能从 workflow 落到对应 system map 和 validation entrypoint
+
+## Assumptions
+- 不新增第三种用户模式；继续只保留 `Quick` 和 `BMM`。
+- `AGENTS.md` 继续保持短索引风格，不膨胀成 handbook。
+- `docs/system-maps/` 继续放在 `.codex` 外，作为 repo 记录系统主体。
+- 优先做兼容性重构，不推翻现有 `openspec` 与 milestone 机制。
+- 第一阶段目标是“让 agent 少猜、多查、多验证”，不是先追求文档数量最大化。
+
+
+# `.codex` + Repo 记录系统分形化优化方案
+
+## Summary
+在现有方案上追加三项硬约束，并保持兼容：
+- `openspec/changes/` 视为本仓库的 `docs/exec-plans/`，不再新建平行计划体系。
+- 建立“代码变更必须联动文档”的机械校验，而不是只靠 closeout 自觉。
+- 对 `src/` 落地分形说明体系，但采用“核心优先”覆盖：先覆盖生产核心目录与生产源码，跳过 JSON、生成文件、第三方样板、测试目录。
+
+目标不是扩写 `.codex`，而是把仓库变成 agent 可读的记录系统：
+- `.codex/` 负责 workflow/control plane
+- `docs/` 负责 durable knowledge
+- `openspec/changes/` 负责 active/completed execution plans
+- `src/` 自带局部自说明与局部索引
+
+## Key Changes
+### 1. 目录职责重划，不复制 `exec-plans`
+- 保留 [`.codex/README.md`](/e:/workspace/ct-scanner-compass-directory/.codex/README.md) 作为控制平面入口，但明确声明：
+  - `openspec/changes/` = active/completed exec plans
+  - `docs/system-maps/` = hot-path architecture maps
+  - `docs/technical/` = durable technical contracts
+  - `ref/` = external references only
+- 新增根级 [`ARCHITECTURE.md`](/e:/workspace/ct-scanner-compass-directory/ARCHITECTURE.md) 作为全局架构地图，内容只保留：
+  - system layering
+  - top-level domain boundaries
+  - docs/openspec/src 三者关系
+  - 指向各 system map / contract doc 的索引
+- 不新建 `docs/exec-plans/`；改为在 `.codex` 与 `docs` 中统一引用 `openspec/changes/`。
+
+### 2. 重组 `docs/` 为可索引记录系统
+- 为 `docs/` 建立 map-of-maps 索引，推荐形成这些稳定入口：
+  - `docs/system-maps/`：运行时与热点系统地图
+  - `docs/technical/`：契约、边界、校验规则
+  - `docs/product-specs/`：用户/业务规格，若暂无则先建 `index.md`
+  - `docs/references/`：面向 agent 的外部参考摘录，逐步从 `ref/` 迁移真正长期依赖的 llms 文本
+- 保留现有 `docs/fixes/`、`docs/strategy/` 等历史资料，但在顶层索引中降级为 archive/reference 类资料，不再混同 source of truth。
+- 所有 system map / technical contract 统一元数据：
+  - `owner`
+  - `status`
+  - `last_reviewed`
+  - `source_of_truth`
+  - `validation_entrypoints`
+
+### 3. 把文档联动更新变成强制检查
+- 新增一个 doc integrity 检查入口，建议命名为 `npm run docs:check`，至少覆盖：
+  - system map/frontmatter 完整性
+  - `.codex`、`docs`、`openspec` 的交叉链接有效性
+  - `src/` 中要求覆盖的目录是否存在局部说明文档
+  - 要求覆盖的源码文件是否存在头部说明
+  - 代码变更是否触发对应目录文档更新提示
+- 新增一个 change-impact 规则：
+  - 若修改 `src/<domain>/...` 生产文件，且该目录受分形说明覆盖，则必须同步修改该目录下的局部说明文件，或在 PR/变更记录中明确声明“结构未变，仅逻辑变更”。
+- 将现有 closeout 规则升级为可执行 contract：
+  - 改代码
+  - 跑验证
+  - 补 `openspec`
+  - 补相关 docs/map
+  - 过 `docs:check`
+
+### 4. 为 `src/` 落地分形结构
+- 采用“核心优先”覆盖边界：
+  - 覆盖：`src/components`、`src/pages`、`src/routes`、`src/lib`、`src/utils`、`src/hooks`、`src/config`、`src/locales`、`src/data`
+  - 跳过：`src/components/ui/*`、`src/**/__tests__/*`、`src/routeTree.gen.ts`、`*.d.ts`、纯静态资源、JSON
+- 每个受覆盖目录都新增一个极简局部说明文件，建议统一为 `README.md`，格式固定：
+  - 第 1 段：3 行内说明目录职责
+  - 第 2 段：文件清单，列 `name | role | responsibility`
+  - 第 3 段：固定维护声明
+    - “一旦我所属的文件夹有所变化，请更新我。”
+- 每个受覆盖源码文件顶部添加固定 4 行注释模板：
+  - `input: ...`
+  - `output: ...`
+  - `pos: ...`
+  - `update: 一旦我被更新，务必更新我的开头注释，以及所属文件夹的 README。`
+- 目录 README 与文件头都追求 agent readability，不写历史背景、情绪性说明、长 prose。
+- 对已有乱码或非 UTF-8 的局部说明文件先统一修复编码，再纳入检查。
+
+### 5. 把架构契约与分形说明联通
+- 在 `ARCHITECTURE.md` 和 `docs/technical/` 中明确 src 的层次约束：
+  - routes/pages 负责 route ownership 与 page composition
+  - templates/layout/components 负责 UI 组合边界
+  - hooks/lib/utils/config 负责数据与 cross-cutting 支撑
+  - locales/data 为内容与资源层
+- 局部 README 不是自由发挥，必须继承全局边界语言，避免目录注释和架构契约打架。
+- 对已有 SEO / i18n / route locale 等机械检查，补一条文档侧索引要求：每个被检查的 contract doc 必须出现在相关目录 README 的“See also”或“source of truth”段。
+
+## Interfaces / Templates
+### Folder README template
+- 标题：`# <Folder> Overview`
+- 3 行内 summary
+- `## Files`
+- 每个文件一行：`- <name>: <role>; <responsibility>`
+- 固定维护句：
+  - `一旦我所属的文件夹有所变化，请更新我。`
+
+### File header template
+```ts
+/* input: <external deps / upstream data / parent contract> */
+/* output: <exports / rendered surface / side effects> */
+/* pos: <role inside local subsystem> */
+/* update: 一旦我被更新，务必更新我的开头注释，以及所属文件夹的 README。 */
+```
+
+### Coverage exceptions
+- 永久跳过：
+  - JSON
+  - lock/generated files
+  - `src/components/ui/*`
+  - `src/**/__tests__/*`
+  - `src/routeTree.gen.ts`
+  - `*.d.ts`
+- 临时跳过但需登记：
+  - 超大目录首次落地时可分批推进，但必须在 `openspec` 中列出未覆盖清单。
+
+## Test Plan
+- `docs:check`
+  - 校验目录 README 存在性
+  - 校验文件头存在性
+  - 校验 frontmatter / metadata
+  - 校验 cross-links
+  - 校验过期 `last_reviewed`
+- workflow smoke
+  - `AGENTS.md -> .codex -> docs/system-maps -> openspec` 路径可导航
+  - `ARCHITECTURE.md` 能作为全局入口正确跳转到具体地图/契约
+- regression
+  - 现有 `ssr-head`、locale、SEO contract 检查继续通过
+  - 文档新增不应破坏现有构建与脚本
+- rollout sampling
+  - 先抽样验证 `src/routes`、`src/pages`、`src/utils` 三个目录的 README + 文件头 + docs:check 流程
+  - 抽样通过后再覆盖其余核心目录
+
+## Assumptions
+- `openspec/changes/` 正式承担 `exec-plans` 职责，不复制一套到 `docs/`.
+- 分形说明采用“核心优先”而不是“绝对全覆盖”。
+- `.codex` 不增加新模式，仍只保留 `Quick` 和 `BMM`。
+- 重点是把“联动更新”做成机械规则，而不是要求每个文档写得更长。
+- 现有乱码/编码问题必须在分形文档推广前先清理，否则注释体系会继续污染上下文。
+
+
+# `.codex` Harness 化与 Windows 友好执行优化方案
+
+## Summary
+在上一版方案基础上，再加一条硬规则：仓库内面向 agent 的执行入口统一收敛到 `npm run ...` 或 `node scripts/...`，不再依赖 PowerShell 易碎的一次性命令串。
+
+目标同时解决四件事：
+- `.codex` 继续只做 workflow/control plane
+- `docs/` + `openspec/changes/` 形成 repo 内记录系统
+- `src/` 建立核心优先的分形说明体系
+- 执行层改成 Node 脚本优先，规避 PowerShell 的 `&&`、`echo`、编码和 quoting 问题
+
+## Key Changes
+### 1. 明确仓库级执行约定：Node-first，shell-last
+- 在 [`.codex/README.md`](/e:/workspace/ct-scanner-compass-directory/.codex/README.md) 和 [`.codex/PROJECT-RULES.md`](/e:/workspace/ct-scanner-compass-directory/.codex/PROJECT-RULES.md) 增加统一规则：
+  - workflow docs、validation docs、change record 中的命令示例默认只写 `npm run <script>` 或 `node scripts/<file>.mjs`
+  - 禁止把 `&&`、`echo`、shell-specific one-liner 作为标准执行入口
+  - 临时 shell 命令只用于人工排障，不作为 repo contract
+- 对 Windows/PowerShell 兼容性给出明确默认：
+  - 所有 agent-facing 命令必须可在 PowerShell 直接运行
+  - 任何多步骤流程都必须有单一 Node 入口包装
+
+### 2. 建立 Node 脚本执行层
+- 在 `scripts/` 下补一层统一 runner，建议按职责分组：
+  - `scripts/docs/*`：文档检查、索引同步、frontmatter 校验
+  - `scripts/agent/*`：组合式任务入口
+  - `scripts/validate/*`：把多条验证命令封装为单一 Node 流程
+- 所有组合验证改成 Node orchestrator：
+  - 例如 `npm run docs:check`
+  - `npm run validate:route-packet`
+  - `npm run validate:i18n`
+  - `npm run validate:seo`
+- 脚本内部统一用 `child_process` / `execa` 风格调用子命令，显式处理：
+  - UTF-8 输出
+  - 退出码透传
+  - 顺序执行与并行执行
+  - 错误摘要
+- 不再要求 agent 在 PowerShell 里手写链式命令。
+
+### 3. 用 `openspec` 承担 exec plans，不复制计划目录
+- `openspec/changes/` 继续承担 `docs/exec-plans` 角色：
+  - active = 当前 change
+  - completed = archive
+  - debt/tracker = 可通过单独索引文档补齐
+- `.codex`、`ARCHITECTURE.md`、`docs` 索引统一指向 `openspec/changes/`，不再新建平行 `docs/exec-plans/`
+- 若需要总览页，只加索引，不复制内容。
+
+### 4. 建立 repo 记录系统
+- 新增根级 `ARCHITECTURE.md`，作为全局地图：
+  - 顶层边界
+  - docs / openspec / src 三者关系
+  - 指向 system maps、technical contracts、active changes
+- `docs/` 重组为 agent 可读记录层：
+  - `docs/system-maps/`：热点系统地图
+  - `docs/technical/`：durable contracts
+  - `docs/product-specs/`：产品规格索引
+  - `docs/references/`：长期保留的 agent 参考摘录
+- 所有 source-of-truth 文档统一元数据：
+  - `owner`
+  - `status`
+  - `last_reviewed`
+  - `source_of_truth`
+  - `validation_entrypoints`
+
+### 5. 为 `src/` 落地分形说明，但只做核心优先覆盖
+- 覆盖目录：
+  - `src/components`
+  - `src/pages`
+  - `src/routes`
+  - `src/lib`
+  - `src/utils`
+  - `src/hooks`
+  - `src/config`
+  - `src/locales`
+  - `src/data`
+- 跳过：
+  - `src/components/ui/*`
+  - `src/**/__tests__/*`
+  - `*.d.ts`
+  - `src/routeTree.gen.ts`
+  - JSON、静态资源、生成文件
+- 每个受覆盖目录新增极简 `README.md`：
+  - 3 行内说明目录职责
+  - 文件清单：`name | role | responsibility`
+  - 固定维护句：
+    - `一旦我所属的文件夹有所变化，请更新我。`
+- 每个受覆盖源码文件顶部统一 4 行注释：
+  - `input`
+  - `output`
+  - `pos`
+  - `update`
+
+### 6. 把联动更新做成机械检查
+- 新增 `npm run docs:check`，内部由 Node 脚本完成，至少检查：
+  - 目录 README 存在性
+  - 文件头存在性
+  - system-map/frontmatter 完整性
+  - `.codex`/`docs`/`openspec` 交叉链接有效性
+  - `last_reviewed` 是否过期
+- 新增 impact rule：
+  - 若修改受覆盖目录下的生产文件，则必须同步更新该目录 `README.md`，或通过结构未变的豁免规则显式声明
+- workflow closeout 必须走单一脚本入口，而不是文档里拼多条 PowerShell 命令。
+
+### 7. 把 `.codex` 文档中的命令全面 Node 化
+- 更新 `.codex/workflows/quick.md`、`.codex/workflows/bmm.md`、validation/closeout docs 中的示例命令：
+  - 把 shell 链式命令替换为 npm scripts
+  - 把 `echo` / 手写环境输出换成 Node logger
+  - 所有“组合验证包”都给唯一命令入口
+- validation matrix 中记录的是“脚本 contract”，不是 shell 片段。
+
+## Interfaces / Contracts
+### New command policy
+- 允许：
+  - `npm run docs:check`
+  - `npm run validate:route-packet`
+  - `node scripts/docs/check.mjs`
+- 不作为标准入口：
+  - `cmd1 && cmd2`
+  - `echo ...`
+  - PowerShell 专属拼接语法
+  - 依赖 shell quoting 的复杂 one-liner
+
+### Folder README template
+- 标题：`# <Folder> Overview`
+- 3 行内 summary
+- `## Files`
+- 每个文件一行：`- <name>: <role>; <responsibility>`
+- 固定维护句：
+  - `一旦我所属的文件夹有所变化，请更新我。`
+
+### File header template
+```ts
+/* input: <external deps / upstream data / parent contract> */
+/* output: <exports / rendered surface / side effects> */
+/* pos: <role inside local subsystem> */
+/* update: 一旦我被更新，务必更新我的开头注释，以及所属文件夹的 README。 */
+```
+
+## Test Plan
+- `npm run docs:check`
+  - 目录 README 覆盖检查
+  - 文件头覆盖检查
+  - 文档元数据检查
+  - 链接完整性检查
+- `npm run validate:workflow`
+  - 校验 `.codex` 中引用的命令入口都存在于 `package.json` 或 `scripts/`
+  - 禁止文档中残留标准化命令以外的 `&&` / `echo` 示例
+- regression
+  - 现有 `ssr-head`、i18n、SEO 检查继续通过
+  - 新 Node orchestrator 在 Windows PowerShell 下可直接运行
+- rollout sampling
+  - 先抽样落地 `src/routes`、`src/pages`、`src/utils`
+  - 再扩到其他核心目录
+
+## Assumptions
+- `openspec/changes/` 正式承担 exec-plans 角色，不复制目录。
+- 分形说明采用“核心优先”，不是绝对全覆盖。
+- Node 脚本是标准执行入口，shell 命令只作临时排障用途。
+- `.codex` 仍只保留 `Quick` 和 `BMM` 两种模式。
+- 首阶段重点是可执行、可检查、Windows 友好，而不是一次性把所有文档体系铺满。
+
+
+# `.codex` Harness 化与仓库记录系统重构方案
+
+## Summary
+目标是把当前仓库从“有流程文档”升级为“agent 可执行、可验证、可索引的记录系统”，同时保持兼容：
+- 保留 `Quick` / `BMM` 两种模式，不新增第三种模式。
+- `openspec/changes/` 正式承担 `exec-plans` 职责，不在 `docs/` 复制一套。
+- `ref/` 只做外部参考，不作为执行真相源。
+- 所有 agent-facing 命令统一收敛到 `npm run ...` 或 `node scripts/...`，不依赖 PowerShell one-liner。
+- `src/` 落地“核心优先”的分形说明体系，并用脚本强制联动更新。
+
+## Root Docs
+### 1. 根级治理文档固定为五类
+- `AGENTS.md`
+  - 只做入口地图，不做百科全书。
+  - 内容只保留模式选择、必读顺序、红线、主入口。
+- `ARCHITECTURE.md`
+  - 顶层结构地图。
+  - 说明 `.codex`、`docs/`、`openspec/`、`src/` 的职责边界与主要依赖方向。
+- `QUALITY_SCORE.md`
+  - 工程质量总分卡，不写长 prose。
+  - 固定维度：
+    - docs freshness
+    - architecture contract compliance
+    - validation pass health
+    - active debt / stale plans
+    - source-of-truth coverage
+  - 每个维度只记录当前等级、判断标准、下钻链接。
+- `RELIABILITY.md`
+  - 稳定性契约总索引。
+  - 固定内容：
+    - 关键运行链路
+    - 最小验证包
+    - blocker vs warning 边界
+    - evidence / observability 要求
+    - 回退原则
+- `SECURITY.md`
+  - 安全边界契约总索引。
+  - 固定内容：
+    - secrets/env handling
+    - auth/admin boundary
+    - external service boundary
+    - redirect/CSP/XSS/script safety rules
+    - 需要额外 review 的变更面
+
+### 2. 这三类治理文档的更新触发规则
+- `QUALITY_SCORE.md`
+  - 当新增/删除质量门、验证包、docs contract、重大 debt 分类时必须更新。
+- `RELIABILITY.md`
+  - 当 build/SSR/prerender/data fallback/audit contract 变化时必须更新。
+- `SECURITY.md`
+  - 当 auth、admin、headers、CSP、secrets、external integration、upload/redirect boundary 变化时必须更新。
+- 三者都不记录实现细节；实现真相源下沉到 `docs/system-maps/*` 与 `docs/technical/*`。
+
+## Record System
+### 3. `docs/` 重组为可被 agent 消费的知识层
+- `docs/system-maps/`
+  - 运行热点地图。
+  - 当前已有内容继续保留并扩充。
+- `docs/technical/`
+  - durable technical contracts。
+  - 存放边界、验证、架构、SEO/i18n/SSR 等契约。
+- `docs/product-specs/`
+  - 产品/业务规格索引。
+  - 没有足够内容时先建立 `index.md` 和空骨架。
+- `docs/references/`
+  - 只收长期保留、已内化为本仓库常用参考的 llm-friendly 摘录。
+  - 不等于 `ref/`。
+- 历史型资料如 `docs/fixes/`、`docs/strategy/` 保留，但在索引中标记为 archive/reference，不当作 source of truth。
+
+### 4. `openspec/changes/` 作为执行计划层
+- `openspec/changes/<active-change>/` = active plan
+- `openspec/changes/archive/...` = completed plans
+- 若需要总览，只在根级或 `docs/` 增加索引页，不复制内容。
+- `.codex` workflow、`ARCHITECTURE.md`、`QUALITY_SCORE.md` 中统一指向 `openspec/changes/`。
+
+### 5. 所有 source-of-truth 文档统一 metadata
+适用于 `docs/system-maps/*`、关键 `docs/technical/*`、必要时 product specs：
+- `owner`
+- `status`
+- `last_reviewed`
+- `source_of_truth`
+- `validation_entrypoints`
+
+## Execution Layer
+### 6. Node-first 执行策略
+- 所有标准命令入口必须是：
+  - `npm run <name>`
+  - `node scripts/<path>.mjs`
+- 不把这些当标准 contract：
+  - `&&`
+  - `echo`
+  - PowerShell quoting tricks
+  - shell-specific one-liner
+- `.codex/workflows/*`、validation docs、`openspec` 中的命令示例统一改为脚本入口。
+
+### 7. 建立脚本编排层
+- `scripts/docs/*`
+  - 文档校验、索引校验、frontmatter/metadata 校验
+- `scripts/validate/*`
+  - 把多步验证打包成单一 Node 命令
+- `scripts/agent/*`
+  - 可选，用于组合性 runner
+- 所有 runner 要求：
+  - UTF-8 输出
+  - 退出码透传
+  - 明确失败摘要
+  - 不依赖 shell chaining
+
+## `src/` Fractal Structure
+### 8. 分形说明覆盖边界
+先覆盖生产核心目录：
+- `src/components`
+- `src/pages`
+- `src/routes`
+- `src/lib`
+- `src/utils`
+- `src/hooks`
+- `src/config`
+- `src/locales`
+- `src/data`
+
+永久跳过：
+- `src/components/ui/*`
+- `src/**/__tests__/*`
+- `*.d.ts`
+- `src/routeTree.gen.ts`
+- JSON、静态资源、生成文件
+
+### 9. 目录级说明模板
+每个受覆盖目录新增 `README.md`，固定格式：
+- 3 行内职责说明
+- `## Files`
+- 每个文件一行：`- <name>: <role>; <responsibility>`
+- 固定维护句：
+  - `一旦我所属的文件夹有所变化，请更新我。`
+
+### 10. 文件头模板
+每个受覆盖源码文件顶部统一 4 行注释：
+```ts
+/* input: <external deps / upstream data / parent contract> */
+/* output: <exports / rendered surface / side effects> */
+/* pos: <role inside local subsystem> */
+/* update: 一旦我被更新，务必更新我的开头注释，以及所属文件夹的 README。 */
+```
+
+### 11. 编码与污染前置清理
+- 在推广分形说明前，先清掉现有 README/局部说明中的乱码与非 UTF-8 编码问题。
+- 未清理目录不得纳入自动检查，否则只会放大噪音。
+
+## Checks And Gates
+### 12. 新增 `npm run docs:check`
+至少检查：
+- 目录 README 覆盖率
+- 文件头覆盖率
+- metadata/frontmatter 完整性
+- `.codex` / `docs` / `openspec` 交叉链接有效性
+- `last_reviewed` 是否过期
+- 文档中是否残留标准命令之外的 shell contract
+
+### 13. 新增联动更新规则
+- 若修改受覆盖目录下的生产文件：
+  - 必须同步更新该目录 `README.md`，或
+  - 在变更记录中显式声明“结构未变，仅逻辑变更”
+- 若修改以下面向治理的 contract，必须同步更新对应根级文档：
+  - 质量门/验证体系变化 -> `QUALITY_SCORE.md`
+  - 稳定性验证/回退/observability 变化 -> `RELIABILITY.md`
+  - 安全边界变化 -> `SECURITY.md`
+
+### 14. rollout 顺序
+- Phase 1
+  - 根级文档骨架：`ARCHITECTURE.md`、`QUALITY_SCORE.md`、`RELIABILITY.md`、`SECURITY.md`
+  - `docs:check` 脚本骨架
+  - `.codex` 命令策略改为 Node-first
+- Phase 2
+  - 试点目录：`src/routes`、`src/pages`、`src/utils`
+  - 完成目录 README、文件头、联动检查
+- Phase 3
+  - 扩到其余核心目录
+  - 把 system maps/technical docs metadata 完整化
+- Phase 4
+  - 将 `QUALITY_SCORE.md` 部分指标半自动化
+  - 加入 stale docs / stale openspec / orphan maps 检查
+
+## Assumptions
+- `ref/` 保留为外部参考层，不参与执行真相判定。
+- `openspec/changes/` 正式承担 `exec-plans` 角色，不复制目录。
+- 分形说明采用“核心优先”，不是绝对全覆盖。
+- 根级治理文档必须短、小、索引化，不能再演变成长篇手册。
+- Node 脚本是标准执行入口；shell 命令只允许做临时人工排障。

@@ -1,0 +1,21 @@
+{
+  "preset": "jest-expo",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "testMatch": [
+    "**/__tests__/**/*.(js|jsx|ts|tsx)",
+    "**/*.(test|spec).(js|jsx|ts|tsx)"
+  ],
+  "collectCoverageFrom": [
+    "**/*.{js,jsx,ts,tsx}",
+    "!**/coverage/**",
+    "!**/node_modules/**",
+    "!**/babel.config.js",
+    "!**/jest.setup.js"
+  ],
+  "modulePathMappings": {
+    "^@acme/(.*)$": "<rootDir>/../../packages/$1/src"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(jest-)?react-native|@react-native|expo|@expo|@react-navigation|@tanstack)"
+  ]
+}

@@ -1,0 +1,36 @@
+id: arch-doc
+description: Root governance and architecture authority documents.
+waiver_class: doc-quality
+rules:
+  require_frontmatter: true
+  required_frontmatter_keys:
+    - owner
+    - status
+    - last_reviewed
+    - source_of_truth
+    - validation_entrypoints
+  frontmatter_array_keys:
+    - source_of_truth
+    - validation_entrypoints
+  freshness_days: 180
+  require_source_of_truth_entries: true
+  require_validation_entrypoints: true
+  required_source_of_truth_any_of_patterns:
+    - ^ARCHITECTURE\.md$
+    - ^docs/
+    - ^\.codex/
+  allowed_source_of_truth_patterns:
+    - ^ARCHITECTURE\.md$
+    - ^QUALITY_SCORE\.md$
+    - ^RELIABILITY\.md$
+    - ^SECURITY\.md$
+    - ^docs/
+    - ^\.codex/
+    - ^openspec/changes/archive/
+    - ^scripts/
+    - ^src/
+  check_links: true
+  check_review_recency: true
+  check_forbidden_reference_patterns: true
+  check_validation_entrypoints: true
+  check_source_of_truth: true

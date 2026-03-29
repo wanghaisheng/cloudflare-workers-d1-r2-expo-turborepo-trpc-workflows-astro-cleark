@@ -1,0 +1,98 @@
+id: governed-surfaces
+governed_roots:
+  - docs/system-maps
+  - docs/technical/doc-governance
+  - docs/product-specs
+governed_documents:
+  - path: ARCHITECTURE.md
+    contract: arch-doc
+  - path: QUALITY_SCORE.md
+    contract: arch-doc
+  - path: RELIABILITY.md
+    contract: arch-doc
+  - path: SECURITY.md
+    contract: arch-doc
+  - path: docs/readme.md
+    contract: dev-plan-overview
+  - path: docs/technical/README.md
+    contract: technical-contract
+  - path: docs/technical/project-architecture-overview.md
+    contract: technical-contract
+  - path: docs/technical/tanstack-architecture.md
+    contract: technical-contract
+  - path: docs/technical/data-strategy.md
+    contract: technical-contract
+  - path: docs/technical/seo-system-governance.md
+    contract: technical-contract
+  - path: docs/technical/import-boundary-contract.md
+    contract: technical-contract
+  - path: docs/technical/layered-architecture-contract.md
+    contract: technical-contract
+  - path: docs/technical/provider-seam-contract.md
+    contract: technical-contract
+  - path: docs/technical/taste-invariants.md
+    contract: technical-contract
+  - pattern: docs/technical/doc-governance/*.md
+    contract: technical-contract
+  - pattern: docs/system-maps/*.md
+    contract: system-map
+  - pattern: docs/product-specs/*.md
+    contract: product-spec
+  - path: docs/references/README.md
+    contract: dev-plan-overview
+workflow_documents:
+  - path: .codex/README.md
+    contract: dev-plan-overview
+    overrides:
+      require_frontmatter: false
+      check_review_recency: false
+      check_source_of_truth: false
+      check_validation_entrypoints: false
+  - path: .codex/PROJECT-RULES.md
+    contract: dev-plan-overview
+    overrides:
+      require_frontmatter: false
+      check_review_recency: false
+      check_source_of_truth: false
+      check_validation_entrypoints: false
+  - path: .codex/workflows/quick.md
+    contract: dev-plan-overview
+    overrides:
+      require_frontmatter: false
+      check_review_recency: false
+      check_source_of_truth: false
+      check_validation_entrypoints: false
+  - path: .codex/workflows/bmm.md
+    contract: dev-plan-overview
+    overrides:
+      require_frontmatter: false
+      check_review_recency: false
+      check_source_of_truth: false
+      check_validation_entrypoints: false
+  - path: .codex/workflows/validate.md
+    contract: dev-plan-overview
+    overrides:
+      require_frontmatter: false
+      check_review_recency: false
+      check_source_of_truth: false
+      check_validation_entrypoints: false
+governed_package_scripts:
+  - build
+  - build:prod
+  - build:dev
+  - audit:dev
+  - audit:prod
+  - audit:strict
+  - audit:strict:dev
+  - prebuild
+  - generate:snapshots
+  - docs:check
+  - docs:check:strict
+  - governance:readiness
+  - lint:architecture
+  - lint:architecture:strict
+  - lint:taste
+  - lint:taste:strict
+  - taste:baseline
+  - taste:baseline:check
+  - check:scripts

@@ -1,0 +1,25 @@
+{
+  "name": "openilink-hub-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply openilink_hub"
+  },
+  "dependencies": {
+    "@openilink/openilink-sdk-node": "0.0.1-dev.1",
+    "@simplewebauthn/server": "^13.3.0",
+    "@simplewebauthn/types": "^12.0.0",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/node": "^22.19.15",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "^5.9.3"
+  }
+}

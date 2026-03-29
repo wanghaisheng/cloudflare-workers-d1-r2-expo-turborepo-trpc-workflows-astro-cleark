@@ -1,0 +1,35 @@
+id: milestone-packet
+description: Readiness packet for a non-trivial milestone or active change record.
+required_fields:
+  - id: goal
+    labels:
+      - goal
+  - id: in-scope
+    labels:
+      - in scope
+  - id: out-of-scope
+    labels:
+      - out of scope
+  - id: dependencies
+    labels:
+      - upstream dependencies
+      - dependencies
+  - id: interface
+    labels:
+      - interface or delivery list
+      - inputs and outputs
+  - id: acceptance
+    labels:
+      - acceptance criteria
+  - id: validation
+    labels:
+      - validation package
+  - id: fallback
+    labels:
+      - fallback note
+      - stop point
+  - id: links
+    labels:
+      - linked docs
+      - linked change record
+allow_placeholder_values: false

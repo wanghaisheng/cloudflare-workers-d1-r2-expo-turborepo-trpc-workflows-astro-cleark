@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "generatedAt": "2026-03-17T00:00:00Z",
+  "notes": "Optional lightweight indexes for WAL entries. Keep small; regenerate manually when needed.",
+  "entries": []
+}
+

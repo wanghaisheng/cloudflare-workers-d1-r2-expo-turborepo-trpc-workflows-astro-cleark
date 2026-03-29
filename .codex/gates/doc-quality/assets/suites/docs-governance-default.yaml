@@ -1,0 +1,6 @@
+id: docs-governance-default
+description: Default doc-quality suite used by npm run docs:check.
+report_output: reports/governance/doc-quality-report.json
+commands:
+  - npm run docs:check
+  - npm run check:scripts

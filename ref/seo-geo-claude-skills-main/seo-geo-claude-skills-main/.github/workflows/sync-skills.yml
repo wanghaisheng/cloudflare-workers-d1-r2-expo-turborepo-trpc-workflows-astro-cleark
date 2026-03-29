@@ -1,0 +1,33 @@
+name: Sync Skills
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/**/SKILL.md"
+      - "build/**/SKILL.md"
+      - "optimize/**/SKILL.md"
+      - "monitor/**/SKILL.md"
+      - "cross-cutting/**/SKILL.md"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Sync skills manifest
+        run: node .github/scripts/sync-skills.js
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync skills manifest"
+          file_pattern: ".claude-plugin/marketplace.json .claude-plugin/plugin.json"

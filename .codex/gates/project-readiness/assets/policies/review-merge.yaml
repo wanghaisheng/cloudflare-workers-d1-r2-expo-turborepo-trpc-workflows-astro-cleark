@@ -1,0 +1,11 @@
+id: review-merge
+warning_issue_codes: []
+blocking_issue_codes:
+  - missing-readiness-target
+  - unknown-packet-type
+  - missing-contract-mapping
+  - unknown-contract-id
+  - missing-packet-field
+  - placeholder-packet-field
+  - invalid-waiver
+  - waiver-expired

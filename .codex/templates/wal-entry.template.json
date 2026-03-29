@@ -1,0 +1,69 @@
+{
+  "id": "YYYY-MM-DD_<change-id>",
+  "createdAt": "YYYY-MM-DDT00:00:00Z",
+  "updatedAt": "YYYY-MM-DDT00:00:00Z",
+  "unit": {
+    "type": "openspec-change",
+    "changeId": "<change-id>",
+    "milestone": "<milestone or M1-M2>",
+    "status": "planned"
+  },
+  "intent": {
+    "summary": "<one-sentence summary>",
+    "whyNow": "<why this change exists now>",
+    "nonGoals": [
+      "<non-goal>"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "decision-1",
+      "title": "<decision title>",
+      "options": [
+        "<option 1>",
+        "<option 2>"
+      ],
+      "decision": "<chosen option>",
+      "rationale": "<why>",
+      "risks": [
+        "<risk>"
+      ]
+    }
+  ],
+  "actions": {
+    "filesTouched": [
+      "<path/to/file>"
+    ],
+    "commandsRun": [
+      "<command>"
+    ],
+    "testsRun": [
+      "<command>"
+    ]
+  },
+  "evidence": {
+    "validationStatus": "unknown",
+    "notes": "<short note>"
+  },
+  "followUps": [
+    "<follow-up>"
+  ],
+  "links": {
+    "changePaths": [
+      "openspec/changes/<change-id>/"
+    ],
+    "commitShas": [
+      "<sha>"
+    ],
+    "changelogPaths": [
+      "CHANGELOG.md"
+    ],
+    "roadmapPaths": [
+      "roadmap.md"
+    ]
+  },
+  "topics": [
+    "<topic>"
+  ]
+}
+

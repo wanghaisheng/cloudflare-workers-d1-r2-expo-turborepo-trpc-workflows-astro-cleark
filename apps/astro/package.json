@@ -10,7 +10,10 @@
     "astro": "astro",
     "clean": "git clean -xdf .cache .next .turbo node_modules",
     "deploy": "wrangler pages deploy dist",
-    "deploy:prod": "wrangler pages deploy dist --env production"
+    "deploy:prod": "wrangler pages deploy dist --env production",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -38,11 +41,18 @@
     "@acme/prettier-config": "workspace:*",
     "@acme/tailwind-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "~18.3.12",
     "@types/react-dom": "18.3.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/ui": "^1.6.0",
     "autoprefixer": "^10.4.20",
+    "jsdom": "^25.0.1",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.13"
+    "tailwindcss": "^3.4.13",
+    "vitest": "^1.6.0"
   },
   "prettier": "@acme/prettier-config"
 }

@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Windows
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Internal planning docs
+docs/plans/
+
+# Environment variables
+.env
+.env.*
+
+# Internal scripts
+scripts/
+
+# Node (if any tooling added later)
+node_modules/

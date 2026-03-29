@@ -1,0 +1,24 @@
+name = "openilink-hub-worker"
+main = "src/index.tsx"
+compatibility_date = "2024-11-27"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/health"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "openilink_hub"
+database_id = "your-database-id"
+migrations_dir = "drizzle"
+migrations_table = "__drizzle_migrations"
+
+[[durable_objects.bindings]]
+name = "WS_MANAGER"
+class_name = "WebSocketManager"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["WebSocketManager"]

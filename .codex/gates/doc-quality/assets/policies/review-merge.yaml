@@ -1,0 +1,36 @@
+id: review-merge
+warning_issue_codes:
+  - stale-review
+blocking_issue_codes:
+  - missing-governed-doc
+  - missing-workflow-doc
+  - unknown-governed-doc
+  - missing-contract-mapping
+  - unknown-contract-id
+  - missing-frontmatter
+  - malformed-frontmatter
+  - missing-frontmatter-key
+  - invalid-frontmatter-type
+  - missing-source-of-truth
+  - invalid-source-of-truth
+  - disallowed-source-of-truth
+  - missing-validation-entrypoint
+  - invalid-validation-entrypoint
+  - broken-local-link
+  - workflow-command-pattern
+  - missing-package-script
+  - shell-chaining-package-script
+  - missing-pilot-readme
+  - missing-pilot-note
+  - missing-pilot-file
+  - missing-pilot-header
+  - suspicious-encoding
+  - missing-non-production-directory
+  - missing-non-production-file
+  - unregistered-non-production-directory
+  - unregistered-non-production-file
+  - forbidden-reference
+  - missing-reference-marker
+  - script-governance
+  - invalid-waiver
+  - waiver-expired

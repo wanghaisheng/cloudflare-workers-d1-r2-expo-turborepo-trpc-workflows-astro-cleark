@@ -1,0 +1,9 @@
+id: waiver-template
+required_fields:
+  - id
+  - scope
+  - reason
+  - owner
+  - approved_by
+  - expires_on
+  - linked_change

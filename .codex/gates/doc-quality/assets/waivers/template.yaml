@@ -1,0 +1,16 @@
+id: waiver-template
+required_fields:
+  - id
+  - scope
+  - reason
+  - owner
+  - approved_by
+  - expires_on
+  - linked_change
+scope_shape:
+  paths:
+    description: exact repo-relative paths covered by the waiver
+  path_patterns:
+    description: optional glob patterns covered by the waiver
+  categories:
+    description: optional issue codes covered by the waiver

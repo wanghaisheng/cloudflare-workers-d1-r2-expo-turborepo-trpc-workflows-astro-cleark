@@ -1,0 +1,13 @@
+id: packet-types
+default_targets:
+  - .codex/templates/change-record/tasks.md
+  - openspec/changes/*/tasks.md
+exclude_patterns:
+  - openspec/changes/archive/**
+packet_types:
+  - path: .codex/templates/change-record/tasks.md
+    contract: milestone-packet
+    overrides:
+      allow_placeholder_values: true
+  - pattern: openspec/changes/*/tasks.md
+    contract: milestone-packet

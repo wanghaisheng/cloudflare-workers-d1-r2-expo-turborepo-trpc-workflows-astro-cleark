@@ -1,0 +1,101 @@
+{
+  "id": "2026-03-17_optimize-extension-ui",
+  "createdAt": "2026-03-17T00:00:00Z",
+  "updatedAt": "2026-03-17T00:00:00Z",
+  "unit": {
+    "type": "openspec-change",
+    "changeId": "optimize-extension-ui",
+    "milestone": "M1-M3",
+    "status": "done"
+  },
+  "intent": {
+    "summary": "Reduce popup UI density and make History (filters/results/details/data management) easier and safer to use.",
+    "whyNow": "Local-first features (History, filters, export, schema pinning, lifecycle controls) increased cognitive load and risk of misclicks; the UI needed clearer hierarchy and safer destructive actions.",
+    "nonGoals": [
+      "No storage schema redesign",
+      "No new external services"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "ui-ia",
+      "title": "History information architecture",
+      "options": [
+        "Keep existing stacked cards (filters/domains/lifecycle/details/results)",
+        "Re-structure into Filters/Results/Details/Data management sections"
+      ],
+      "decision": "Re-structure into four sections with progressive disclosure for advanced filters.",
+      "rationale": "Matches user task flow (filter → select → export) and isolates destructive actions.",
+      "risks": [
+        "Playwright selectors may break if anchored on text; mitigate with data-testid"
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Destructive action confirmation",
+      "options": [
+        "window.confirm() dialogs",
+        "Popup two-step confirm (Confirm/Cancel) with auto-expire"
+      ],
+      "decision": "Two-step confirm inside popup with 10s auto-expire.",
+      "rationale": "More reliable in automation and reduces accidental destructive clicks without relying on browser dialogs."
+    },
+    {
+      "id": "bulk-export",
+      "title": "Bulk export of current results",
+      "options": [
+        "Single-entry export only",
+        "Bulk JSON of all shown",
+        "Bulk merged TSV/CSV"
+      ],
+      "decision": "Add bulk JSON and merged TSV/CSV exports for current Results.",
+      "rationale": "Avoids repetitive per-page downloads; keeps exports local-first and deterministic within current filter scope."
+    }
+  ],
+  "actions": {
+    "filesTouched": [
+      "src/components/history.tsx",
+      "src/components/header.tsx",
+      "src/components/header.css",
+      "src/components/button.tsx",
+      "tests/extension/sqlite-autocapture.spec.ts",
+      "openspec/changes/optimize-extension-ui/*"
+    ],
+    "commandsRun": [
+      "npm run test:unit",
+      "npm run test:pw"
+    ],
+    "testsRun": [
+      "npm run test:unit",
+      "npm run test:pw"
+    ]
+  },
+  "evidence": {
+    "validationStatus": "pass",
+    "notes": "Playwright E2E updated to use data-testid and download.saveAs for stability."
+  },
+  "followUps": [
+    "Optional: add ZIP export for per-extraction files if users want separate outputs",
+    "Optional: improve status message placement (inline near actions) for even clearer feedback"
+  ],
+  "links": {
+    "changePaths": [
+      "openspec/changes/optimize-extension-ui/"
+    ],
+    "commitShas": [],
+    "changelogPaths": [
+      "CHANGELOG.md"
+    ],
+    "roadmapPaths": [
+      "roadmap.md"
+    ]
+  },
+  "topics": [
+    "ui",
+    "ux",
+    "history",
+    "export",
+    "playwright"
+  ]
+}
+

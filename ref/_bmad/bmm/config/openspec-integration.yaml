@@ -1,0 +1,534 @@
+# OpenSpec Integration Configuration
+# Defines how workflows integrate with OpenSpec based on their role and importance
+
+version: "1.0.0"
+created: "2026-02-28"
+description: "OpenSpec integration configuration for all workflows"
+
+# Integration levels
+integration_levels:
+  mandatory:
+    description: "Workflow must use OpenSpec - critical for system operation"
+    enforcement: "strict"
+    validation: "required"
+    fallback: "none"
+    
+  recommended:
+    description: "Workflow should use OpenSpec - provides better context and functionality"
+    enforcement: "soft"
+    validation: "optional"
+    fallback: "standalone"
+    
+  optional:
+    description: "Workflow can use OpenSpec - enhances functionality but not required"
+    enforcement: "minimal"
+    validation: "none"
+    fallback: "standalone"
+
+# Workflow classifications
+workflows:
+  # Shared workflows - used by both Quick Dev and BMM modes
+  shared:
+    check-compliance:
+      integration_level: "mandatory"
+      role: "validator"
+      description: "Validates OpenSpec changes against standards for both Quick Dev and BMM"
+      openspec_operations:
+        - "read_change"
+        - "validate_compliance"
+        - "update_status"
+      usage_modes:
+        quick_dev: "Quick compliance checks for rapid development"
+        bmm: "Comprehensive compliance checks for full process"
+      dependencies: []
+      
+    code-review:
+      integration_level: "mandatory"
+      role: "code_reviewer"
+      description: "Performs code review for OpenSpec changes in both modes"
+      openspec_operations:
+        - "read_change"
+        - "review_code"
+        - "update_status"
+      usage_modes:
+        quick_dev: "Rapid code review for quick changes"
+        bmm: "Comprehensive code review for full process"
+      dependencies: []
+      
+    workflow-status:
+      integration_level: "mandatory"
+      role: "workflow_status_manager"
+      description: "Manages workflow status across both Quick Dev and BMM modes"
+      openspec_operations:
+        - "read_status"
+        - "update_status"
+        - "sync_status"
+      usage_modes:
+        quick_dev: "Quick status tracking for rapid development"
+        bmm: "Comprehensive status tracking for full process"
+      dependencies: []
+      
+    status-management:
+      integration_level: "mandatory"
+      role: "status_manager"
+      description: "Manages OpenSpec change status across both modes"
+      openspec_operations:
+        - "read_status"
+        - "update_status"
+        - "sync_status"
+      usage_modes:
+        quick_dev: "Quick status management for rapid development"
+        bmm: "Comprehensive status management for full process"
+      dependencies: []
+      
+    quality-check:
+      integration_level: "mandatory"
+      role: "quality_checker"
+      description: "Checks quality of OpenSpec changes for both modes"
+      openspec_operations:
+        - "read_change"
+        - "check_quality"
+        - "update_metrics"
+      usage_modes:
+        quick_dev: "Quick quality checks for rapid development"
+        bmm: "Comprehensive quality checks for full process"
+      dependencies: []
+      
+    archive:
+      integration_level: "mandatory"
+      role: "archiver"
+      description: "Archives completed OpenSpec changes for both modes"
+      openspec_operations:
+        - "read_change"
+        - "archive_change"
+        - "update_status"
+      usage_modes:
+        quick_dev: "Quick archiving for rapid development"
+        bmm: "Comprehensive archiving for full process"
+      dependencies: []
+      
+    document-project:
+      integration_level: "recommended"
+      role: "project_documenter"
+      description: "Documents projects for both Quick Dev and BMM modes"
+      openspec_operations:
+        - "read_project"
+        - "generate_documentation"
+        - "maintain_documentation"
+      usage_modes:
+        quick_dev: "Quick project documentation for rapid development"
+        bmm: "Comprehensive project documentation for full process"
+      dependencies: []
+
+  # Quick Dev exclusive workflows
+  quick_dev:
+    quick-spec:
+      integration_level: "mandatory"
+      role: "creator"
+      description: "Creates OpenSpec changes and specifications for Quick Dev"
+      openspec_operations:
+        - "create_change"
+        - "create_specification"
+        - "update_status"
+      usage_modes:
+        quick_dev: "Rapid specification creation for quick development"
+      dependencies:
+        - "unified"
+      
+    quick-dev:
+      integration_level: "mandatory"
+      role: "executor"
+      description: "Executes OpenSpec changes and implementations for Quick Dev"
+      openspec_operations:
+        - "read_specification"
+        - "update_status"
+        - "create_artifacts"
+      usage_modes:
+        quick_dev: "Rapid implementation for quick development"
+      dependencies:
+        - "quick-spec"
+      
+    unified:
+      integration_level: "mandatory"
+      role: "router"
+      description: "Routes to appropriate OpenSpec workflows for Quick Dev"
+      openspec_operations:
+        - "detect_intent"
+        - "route_workflow"
+        - "manage_context"
+      usage_modes:
+        quick_dev: "Intelligent routing for quick development"
+      dependencies: []
+
+  # BMM exclusive workflows
+  bmm:
+    create-product-brief:
+      integration_level: "mandatory"
+      role: "product_brief_creator"
+      description: "Creates product briefs as OpenSpec artifacts for BMM"
+      openspec_operations:
+        - "create_change"
+        - "create_product_brief"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive product brief creation for full process"
+      dependencies: []
+      
+    research:
+      integration_level: "mandatory"
+      role: "researcher"
+      description: "Conducts research and stores in OpenSpec for BMM"
+      openspec_operations:
+        - "create_change"
+        - "store_research"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive research for full process"
+      dependencies: []
+      
+    prd:
+      integration_level: "mandatory"
+      role: "prd_manager"
+      description: "Manages PRD as OpenSpec artifact for BMM"
+      openspec_operations:
+        - "create_change"
+        - "create_prd"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive PRD management for full process"
+      dependencies:
+        - "create-product-brief"
+        - "research"
+      
+    create-ux-design:
+      integration_level: "mandatory"
+      role: "ux_designer"
+      description: "Creates UX design as OpenSpec artifact for BMM"
+      openspec_operations:
+        - "create_change"
+        - "create_ux_design"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive UX design for full process"
+      dependencies:
+        - "prd"
+      
+    create-architecture:
+      integration_level: "mandatory"
+      role: "architect"
+      description: "Creates architecture as OpenSpec artifact for BMM"
+      openspec_operations:
+        - "create_change"
+        - "create_architecture"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive architecture for full process"
+      dependencies:
+        - "prd"
+        - "create-ux-design"
+      
+    create-epics-and-stories:
+      integration_level: "mandatory"
+      role: "story_creator"
+      description: "Creates epics and stories as OpenSpec artifacts for BMM"
+      openspec_operations:
+        - "create_change"
+        - "create_epics_stories"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive story creation for full process"
+      dependencies:
+        - "create-architecture"
+      
+    check-implementation-readiness:
+      integration_level: "mandatory"
+      role: "readiness_validator"
+      description: "Validates implementation readiness in OpenSpec for BMM"
+      openspec_operations:
+        - "read_change"
+        - "validate_readiness"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive readiness validation for full process"
+      dependencies:
+        - "create-epics-and-stories"
+      
+    dev-story:
+      integration_level: "mandatory"
+      role: "developer"
+      description: "Executes development stories from OpenSpec for BMM"
+      openspec_operations:
+        - "read_specification"
+        - "implement_story"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive story implementation for full process"
+      dependencies:
+        - "check-implementation-readiness"
+      
+    sprint-planning:
+      integration_level: "mandatory"
+      role: "sprint_planner"
+      description: "Plans sprints using OpenSpec data for BMM"
+      openspec_operations:
+        - "read_stories"
+        - "plan_sprint"
+        - "update_status"
+      usage_modes:
+        bmm: "Comprehensive sprint planning for full process"
+      dependencies:
+        - "create-epics-and-stories"
+      
+    sprint-status:
+      integration_level: "mandatory"
+      role: "sprint_tracker"
+      description: "Tracks sprint status in OpenSpec for BMM"
+      openspec_operations:
+        - "read_sprint"
+        - "update_status"
+        - "track_progress"
+      usage_modes:
+        bmm: "Comprehensive sprint tracking for full process"
+      dependencies:
+        - "sprint-planning"
+
+  # Support workflows - recommended OpenSpec integration
+  support:
+    documentation:
+      integration_level: "recommended"
+      role: "documenter"
+      description: "Generates documentation for OpenSpec changes"
+      openspec_operations:
+        - "read_change"
+        - "generate_documentation"
+        - "update_documentation"
+      dependencies:
+        - "quick-dev"
+      standalone_mode:
+        description: "Can generate documentation without OpenSpec context"
+        limitations:
+          - "Limited context awareness"
+          - "Manual change identification"
+          - "Reduced automation"
+      
+    reporting:
+      integration_level: "recommended"
+      role: "reporter"
+      description: "Generates reports for OpenSpec changes"
+      openspec_operations:
+        - "read_change"
+        - "generate_reports"
+        - "distribute_reports"
+      dependencies:
+        - "status-management"
+      standalone_mode:
+        description: "Can generate reports without OpenSpec context"
+        limitations:
+          - "Limited data sources"
+          - "Manual data collection"
+          - "Reduced comprehensiveness"
+      
+    task-management:
+      integration_level: "recommended"
+      role: "task_manager"
+      description: "Manages tasks for OpenSpec changes"
+      openspec_operations:
+        - "read_change"
+        - "create_tasks"
+        - "update_tasks"
+      dependencies:
+        - "quick-spec"
+      standalone_mode:
+        description: "Can manage tasks without OpenSpec context"
+        limitations:
+          - "Manual task creation"
+          - "Limited context awareness"
+          - "Reduced automation"
+      
+    task-automation:
+      integration_level: "recommended"
+      role: "task_automator"
+      description: "Automates tasks for OpenSpec changes"
+      openspec_operations:
+        - "read_change"
+        - "analyze_tasks"
+        - "execute_automation"
+      dependencies:
+        - "task-management"
+      standalone_mode:
+        description: "Can automate tasks without OpenSpec context"
+        limitations:
+          - "Manual task identification"
+          - "Limited optimization"
+          - "Reduced intelligence"
+
+  # Management workflows - optional OpenSpec integration
+  management:
+    retrospective:
+      integration_level: "optional"
+      role: "retrospective_analyzer"
+      description: "Analyzes completed changes for lessons learned"
+      openspec_operations:
+        - "read_change"
+        - "analyze_retrospective"
+        - "generate_lessons"
+      dependencies:
+        - "archive"
+      standalone_mode:
+        description: "Can conduct retrospectives without OpenSpec context"
+        advantages:
+          - "Lightweight operation"
+          - "Flexible scope"
+          - "Quick execution"
+        limitations:
+          - "Limited historical context"
+          - "Manual data collection"
+          - "Reduced comprehensiveness"
+      
+    process-standards:
+      integration_level: "optional"
+      role: "standards_manager"
+      description: "Defines and enforces process standards"
+      openspec_operations:
+        - "read_standards"
+        - "define_standards"
+        - "enforce_standards"
+      dependencies: []
+      standalone_mode:
+        description: "Can manage standards without OpenSpec context"
+        advantages:
+          - "Independent operation"
+          - "Broad applicability"
+          - "Flexible implementation"
+        limitations:
+          - "Limited context awareness"
+          - "Manual integration"
+          - "Reduced automation"
+      
+    document-project:
+      integration_level: "optional"
+      role: "project_documenter"
+      description: "Documents entire project structure and processes"
+      openspec_operations:
+        - "read_project"
+        - "generate_documentation"
+        - "maintain_documentation"
+      dependencies: []
+      standalone_mode:
+        description: "Can document projects without OpenSpec context"
+        advantages:
+          - "Project-wide scope"
+          - "Independent operation"
+          - "Flexible documentation"
+        limitations:
+          - "Limited change context"
+          - "Manual data collection"
+          - "Reduced automation"
+
+# Integration rules
+integration_rules:
+  mandatory:
+    - "Workflow MUST validate OpenSpec availability before execution"
+    - "Workflow MUST handle OpenSpec errors gracefully"
+    - "Workflow MUST provide meaningful error messages for OpenSpec issues"
+    - "Workflow MUST NOT proceed without OpenSpec when required"
+    
+  recommended:
+    - "Workflow SHOULD attempt OpenSpec integration first"
+    - "Workflow SHOULD fallback to standalone mode if OpenSpec unavailable"
+    - "Workflow SHOULD provide clear indication of integration mode"
+    - "Workflow SHOULD log integration mode for debugging"
+    
+  optional:
+    - "Workflow MAY attempt OpenSpec integration if available"
+    - "Workflow MAY operate in standalone mode by default"
+    - "Workflow MAY provide OpenSpec-enhanced features"
+    - "Workflow MAY allow user to choose integration mode"
+
+# Validation rules
+validation_rules:
+  mandatory:
+    - "OpenSpec data structure validation"
+    - "OpenSpec access permission validation"
+    - "OpenSpec operation success validation"
+    - "OpenSpec data integrity validation"
+    
+  recommended:
+    - "OpenSpec data quality validation"
+    - "OpenSpec context relevance validation"
+    - "OpenSpec integration benefit validation"
+    
+  optional:
+    - "OpenSpec availability validation"
+    - "OpenSpec compatibility validation"
+
+# Error handling
+error_handling:
+  mandatory:
+    strategy: "fail_fast"
+    retry_attempts: 3
+    retry_delay: 1000
+    fallback_mode: "none"
+    
+  recommended:
+    strategy: "graceful_degradation"
+    retry_attempts: 2
+    retry_delay: 500
+    fallback_mode: "standalone"
+    
+  optional:
+    strategy: "best_effort"
+    retry_attempts: 1
+    retry_delay: 200
+    fallback_mode: "standalone"
+
+# Performance optimization
+performance:
+  mandatory:
+    cache_strategy: "aggressive"
+    connection_pooling: true
+    batch_operations: true
+    
+  recommended:
+    cache_strategy: "moderate"
+    connection_pooling: true
+    batch_operations: false
+    
+  optional:
+    cache_strategy: "minimal"
+    connection_pooling: false
+    batch_operations: false
+
+# Monitoring and logging
+monitoring:
+  mandatory:
+    log_level: "info"
+    metrics_collection: true
+    performance_tracking: true
+    
+  recommended:
+    log_level: "warn"
+    metrics_collection: true
+    performance_tracking: false
+    
+  optional:
+    log_level: "error"
+    metrics_collection: false
+    performance_tracking: false
+
+# Configuration validation
+schema_validation:
+  required_fields:
+    - "name"
+    - "integration_level"
+    - "role"
+    - "description"
+    
+  optional_fields:
+    - "openspec_operations"
+    - "dependencies"
+    - "standalone_mode"
+    
+  allowed_values:
+    integration_level: ["mandatory", "recommended", "optional"]
+    role: ["creator", "executor", "router", "validator", "archiver", "status_manager", "quality_checker", "documenter", "reporter", "task_manager", "task_automator", "retrospective_analyzer", "standards_manager", "project_documenter"]

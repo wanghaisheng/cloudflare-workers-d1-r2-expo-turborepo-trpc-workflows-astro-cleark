@@ -4,14 +4,19 @@
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev --test-scheduled --remote",
-		"clean": "git clean -xdf .cache .turbo node_modules .wrangler"
+		"clean": "git clean -xdf .cache .turbo node_modules .wrangler",
+		"test": "vitest",
+		"test:local": "vitest --config vitest.config.local.ts"
 	},
 	"type": "module",
 	"devDependencies": {
 		"@acme/db": "workspace:*",
 		"@acme/eslint-config": "workspace:*",
 		"@acme/tsconfig": "workspace:*",
+		"@types/better-sqlite3": "^7.6.8",
+		"better-sqlite3": "^9.2.2",
 		"typescript": "^5.3.3",
+		"vitest": "^1.6.0",
 		"wrangler": "3.93.0"
 	}
 }

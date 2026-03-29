@@ -1,0 +1,60 @@
+name: Validate Agent Skill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/SKILL.md"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/SKILL.md"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get changed SKILL.md files
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: "**/SKILL.md"
+
+      - name: Validate changed skills
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          npm install -g skills-ref 2>/dev/null || true
+          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+            dir=$(dirname "$file")
+            echo "Validating: $dir"
+            if command -v skills-ref &> /dev/null; then
+              skills-ref validate "$dir"
+            else
+              echo "skills-ref not available, running basic validation..."
+              # Basic YAML frontmatter validation
+              if ! head -1 "$file" | grep -q "^---$"; then
+                echo "ERROR: $file missing YAML frontmatter"
+                exit 1
+              fi
+              # Check name field exists
+              if ! grep -q "^name:" "$file"; then
+                echo "ERROR: $file missing required 'name' field"
+                exit 1
+              fi
+              # Check description field exists
+              if ! grep -q "^description:" "$file"; then
+                echo "ERROR: $file missing required 'description' field"
+                exit 1
+              fi
+              # Check name matches directory
+              skill_name=$(grep "^name:" "$file" | sed 's/name: *//')
+              dir_name=$(basename "$dir")
+              if [ "$skill_name" != "$dir_name" ]; then
+                echo "ERROR: name '$skill_name' does not match directory '$dir_name'"
+                exit 1
+              fi
+              echo "PASS: $file"
+            fi
+          done

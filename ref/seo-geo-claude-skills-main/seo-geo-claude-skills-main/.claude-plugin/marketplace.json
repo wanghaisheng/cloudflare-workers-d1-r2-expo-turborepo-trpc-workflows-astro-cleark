@@ -1,0 +1,59 @@
+{
+  "name": "SpaceForAI-Agent-Plugins",
+  "owner": {
+    "name": "Aaron He Zhu",
+    "url": "https://github.com/aaron-he-zhu"
+  },
+  "metadata": {
+    "description": "SEO & GEO agent tools for Claude Code and Cowork",
+    "version": "2.0.0",
+    "repository": "https://github.com/aaron-he-zhu/seo-geo-claude-skills"
+  },
+  "plugins": [
+    {
+      "name": "seo-geo-claude-skills",
+      "source": ".",
+      "description": "20 skills and 9 commands for Search Engine Optimization (SEO) and Generative Engine Optimization (GEO). Content quality powered by CORE-EEAT (80 items). Domain authority powered by CITE (40 items). Keyword research, competitor analysis, content writing, technical audits, rank tracking, schema markup, and AI citation optimization.",
+      "version": "2.0.0",
+      "category": "marketing",
+      "tags": [
+        "seo",
+        "geo",
+        "content-optimization",
+        "search-engine-optimization",
+        "generative-engine-optimization",
+        "ai-citation",
+        "core-eeat",
+        "cite",
+        "keyword-research",
+        "content-writing",
+        "technical-seo",
+        "schema-markup",
+        "rank-tracking",
+        "backlink-analysis"
+      ],
+      "skills": [
+        "./research/competitor-analysis",
+        "./research/content-gap-analysis",
+        "./research/keyword-research",
+        "./research/serp-analysis",
+        "./build/geo-content-optimizer",
+        "./build/meta-tags-optimizer",
+        "./build/schema-markup-generator",
+        "./build/seo-content-writer",
+        "./optimize/content-refresher",
+        "./optimize/internal-linking-optimizer",
+        "./optimize/on-page-seo-auditor",
+        "./optimize/technical-seo-checker",
+        "./monitor/alert-manager",
+        "./monitor/backlink-analyzer",
+        "./monitor/performance-reporter",
+        "./monitor/rank-tracker",
+        "./cross-cutting/content-quality-auditor",
+        "./cross-cutting/domain-authority-auditor",
+        "./cross-cutting/entity-optimizer",
+        "./cross-cutting/memory-management"
+      ]
+    }
+  ]
+}

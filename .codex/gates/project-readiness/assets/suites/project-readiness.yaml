@@ -1,0 +1,5 @@
+id: project-readiness
+description: Default project-readiness suite used by npm run governance:readiness.
+report_output: reports/governance/project-readiness-report.json
+commands:
+  - npm run governance:readiness

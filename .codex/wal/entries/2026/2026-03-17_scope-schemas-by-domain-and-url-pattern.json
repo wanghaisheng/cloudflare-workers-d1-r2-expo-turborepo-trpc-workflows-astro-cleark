@@ -1,0 +1,88 @@
+{
+  "id": "2026-03-17_scope-schemas-by-domain-and-url-pattern",
+  "createdAt": "2026-03-17T00:00:00Z",
+  "updatedAt": "2026-03-17T00:00:00Z",
+  "unit": {
+    "type": "openspec-change",
+    "changeId": "scope-schemas-by-domain-and-url-pattern",
+    "milestone": "M1-M2",
+    "status": "done"
+  },
+  "intent": {
+    "summary": "Scope schema versioning by (domain + url_pattern) to avoid cross-page-type bumps and harden wa-sqlite stability.",
+    "whyNow": "Domain-wide schema bumps caused small page variations to affect unrelated page types; concurrent DB ops could crash wa-sqlite.",
+    "nonGoals": [
+      "No per-site custom mapping UI for url_pattern yet",
+      "No cloud sync"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "pattern-bucket",
+      "title": "Schema bucket key",
+      "options": [
+        "Scope schemas by domain only",
+        "Scope schemas by (domain + url_pattern)"
+      ],
+      "decision": "Use (domain + url_pattern) as schema scope.",
+      "rationale": "Page-type streams (e.g. /products vs /users) evolve independently and should not interfere.",
+      "risks": [
+        "url_pattern is heuristic; may need per-domain overrides later"
+      ]
+    },
+    {
+      "id": "walock",
+      "title": "wa-sqlite stability strategy",
+      "options": [
+        "Allow concurrent reads/writes",
+        "Serialize writes only",
+        "Serialize all DB operations"
+      ],
+      "decision": "Serialize all DB operations through a single lock.",
+      "rationale": "Extension popup is low-throughput; serialization avoids intermittent binding/OOB crashes under concurrent calls."
+    }
+  ],
+  "actions": {
+    "filesTouched": [
+      "src/utils/sqlite/wa.ts",
+      "src/components/history.tsx",
+      "src/utils/sqlite/storage.ts",
+      "tests/extension/sqlite-autocapture.spec.ts"
+    ],
+    "commandsRun": [
+      "npm run test:unit",
+      "npm run test:pw"
+    ],
+    "testsRun": [
+      "npm run test:unit",
+      "npm run test:pw"
+    ]
+  },
+  "evidence": {
+    "validationStatus": "pass",
+    "notes": "E2E covers /products and /users buckets; stability hardened by serialized DB access."
+  },
+  "followUps": [
+    "Consider adding per-domain url_pattern mapping rules if heuristic buckets are insufficient"
+  ],
+  "links": {
+    "changePaths": [
+      "openspec/changes/archive/scope-schemas-by-domain-and-url-pattern/"
+    ],
+    "commitShas": [],
+    "changelogPaths": [
+      "CHANGELOG.md"
+    ],
+    "roadmapPaths": [
+      "roadmap.md"
+    ]
+  },
+  "topics": [
+    "sqlite",
+    "wa-sqlite",
+    "schema",
+    "url_pattern",
+    "stability"
+  ]
+}
+

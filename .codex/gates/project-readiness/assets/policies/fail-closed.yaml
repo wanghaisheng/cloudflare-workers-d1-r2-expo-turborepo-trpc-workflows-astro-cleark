@@ -1,0 +1,3 @@
+id: fail-closed
+fail_on_unmapped_packets: true
+fail_on_missing_contracts: true

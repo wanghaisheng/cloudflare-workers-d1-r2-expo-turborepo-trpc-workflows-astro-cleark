@@ -1,0 +1,13 @@
+id: semantic-policy
+reference_marker_pattern: (?:non-authoritative|upstream|reference only|historical|not the active execution layer|not the primary execution layer|not the active local execution document|copied upstream|copied guide|copied wrapper|upstream background)
+workflow_command_pattern: "`[^`\\n]*(?:&&|\\|\\||\\becho\\b)[^`\\n]*`"
+workflow_command_negation_pattern: (?:do not|don't|avoid|forbid|not valid|not use)
+forbidden_governed_reference_patterns:
+  - pattern: _bmad[\\/].*?[\\/]archive[\\/]
+    description: _bmad archive path
+  - pattern: _bmad[\\/].*?[\\/]fixture[^\\/\s]*\.md
+    description: _bmad fixture markdown path
+  - pattern: _bmad[\\/].*?[\\/]fixtures[^\\/\s]*\.md
+    description: _bmad fixtures markdown path
+suspicious_encoding_snippets:
+  - 涓枃
